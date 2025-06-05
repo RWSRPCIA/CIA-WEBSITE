@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDnzDuUejEoH0Kfu2hAxdawkQsiuzCenz0",
+    authDomain: "cia-site.firebaseapp.com",
+    projectId: "cia-site",
+    storageBucket: "cia-site.appspot.com",
+    messagingSenderId: "988963956053",
+    appId: "1:988963956053:web:753d2e865f4e4b299c7bdc"
+  };
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIA Access Portal - SASRP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 184, 148, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 123, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(108, 99, 255, 0.1) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(1deg); }
+    }
+
+    /* Login Page */
+    #loginPage {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 48px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cia-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00b894, #0984e3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .login-title {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #00b894, #0984e3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 32px;
+      font-weight: 300;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: #00b894;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.1);
+    }
+
+    .input-field::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.5);
+      transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: #00b894;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #00b894, #0984e3);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 184, 148, 0.3);
+    }
+
+    .login-message {
+      margin-top: 16px;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    /* Dashboard */
+    #dashboard {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .dashboard-header {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00b894, #0984e3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .dashboard-main {
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .nav-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 32px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .nav-card:hover::before {
+      left: 100%;
+    }
+
+    .nav-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      border-color: rgba(0, 184, 148, 0.5);
+    }
+
+    .nav-card-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 20px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, #00b894, #0984e3);
+    }
+
+    .nav-card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .nav-card p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Content Sections */
+    .content-section {
+      display: none;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .content-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .content-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: #00b894;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00b894, #0984e3);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 184, 148, 0.3);
+    }
+
+    .report-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .report-time {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .agent-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    .status-success {
+      background: rgba(0, 184, 148, 0.2);
+      border: 1px solid rgba(0, 184, 148, 0.3);
+      color: #00b894;
+    }
+
+    .status-error {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #e74c3c;
+    }
+
+    .status-warning {
+      background: rgba(230, 126, 34, 0.2);
+      border: 1px solid rgba(230, 126, 34, 0.3);
+      color: #e67e22;
+    }
+
+    .case-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .case-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(0, 184, 148, 0.3);
+    }
+
+    .case-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .case-number {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: #00b894;
+    }
+
+    .priority-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .priority-low { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+    .priority-medium { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
+    .priority-high { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+    .priority-critical { background: rgba(192, 57, 43, 0.3); color: #c0392b; animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .case-meta {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .agent-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .agent-info {
+      flex: 1;
+    }
+
+    .agent-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .agent-details {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.4;
+    }
+
+    .badge-number {
+      font-family: 'Courier New', monospace;
+      background: rgba(0, 184, 148, 0.2);
+      color: #00b894;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 16px 20px;
+      }
+      
+      .dashboard-main {
+        padding: 20px;
+        grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 20px;
+      }
+      
+      .login-container {
+        padding: 32px 24px;
+      }
+    }
+  
+.form-select {
+  background-color: rgba(30, 30, 30, 0.8);
+  color: white;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.form-select option {
+  background: #1a1a2e;
+  color: white;
+}
+
+</style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+
+  <!-- Login Page -->
+  <div id="loginPage">
+    <div class="login-container">
+      <div class="cia-logo"><img src="cia-logo-png-transparent.png" alt="CIA Logo" style="width: 80px; height: 80px; object-fit: contain; border-radius: 50%;"></div>
+      <h2 class="login-title">Access Portal</h2>
+      <p class="login-subtitle">Secure Network Entry</p>
+      
+      <div class="input-group">
+        <input type="text" id="username" class="input-field" placeholder="Username" required>
+      </div>
+      
+      <div class="input-group">
+        <input type="password" id="password" class="input-field" placeholder="Password" required>
+        <span class="password-toggle" onclick="togglePassword()">👁️</span>
+      </div>
+      
+      <button class="login-btn" id="loginBtn" onclick="login()" disabled>Connecting to Firebase...</button>
+      <div id="loginMessage" class="login-message"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard">
+    <div class="dashboard-header">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar"></div>
+        <div>
+          <div id="roleTitle" style="font-weight: 600;"></div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.6);" id="badgeInfo"></div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.4);" id="departmentInfo"></div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div id="dashboardNav" class="dashboard-main">
+      <div class="nav-card" onclick="showSection('cases')">
+        <div class="nav-card-icon">🗂️</div>
+        <h3>Active Cases</h3>
+        <p>Manage and track ongoing CIA operations and investigations</p>
+      </div>
+
+      <div class="nav-card" onclick="showSection('submit')">
+        <div class="nav-card-icon">📝</div>
+        <h3>Submit Intel</h3>
+        <p>Submit mission reports and intelligence data to the central database</p>
+      </div>
+
+      <div class="nav-card" onclick="showSection('reports')">
+        <div class="nav-card-icon">📊</div>
+        <h3>Mission Log</h3>
+        <p>View and analyze submitted mission reports and intelligence data</p>
+      </div>
+
+      <div class="nav-card" id="manageCard" onclick="showSection('manage')" style="display: none;">
+        <div class="nav-card-icon">👥</div>
+        <h3>Personnel Management</h3>
+        <p>Create and manage agent accounts, departments, and assignments</p>
+      </div>
+    </div>
+
+    <!-- Active Cases Section -->
+    <div id="casesSection" class="content-section">
+      <div class="content-header">
+        <button class="back-btn" onclick="showDashboard()">← Back</button>
+        <h2>Active CIA Operations</h2>
+      </div>
+      
+      <div class="content-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3>Create New Case</h3>
+          <button class="btn-primary" onclick="generateCaseNumber()" style="padding: 8px 16px; font-size: 12px;">Generate Case #</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Case Number</label>
+          <input type="text" id="caseNumber" class="form-input" readonly placeholder="Click Generate Case # button">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Case Title</label>
+          <input type="text" id="caseTitle" class="form-input" placeholder="Enter case title">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Case Type</label>
+          <select id="caseType" class="form-select">
+            <option value="">Select case type</option>
+            <option value="Wildlife Poaching">Wildlife Poaching</option>
+            <option value="Illegal Fishing">Illegal Fishing</option>
+            <option value="Trafficking">Trafficking</option>
+            <option value="Environmental Crime">Environmental Crime</option>
+            <option value="Undercover Operation">Undercover Operation</option>
+            <option value="Surveillance">Surveillance</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority Level</label>
+          <select id="casePriority" class="form-select">
+            <option value="Low">Low Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="High">High Priority</option>
+            <option value="Critical">Critical Priority</option>
+          </select>
+        </div>
+        <div class="form-group" id="assignAgentGroup" style="display: none;">
+          <label class="form-label">Assign Agent</label>
+          <select id="assignedAgent" class="form-select">
+            <option value="">Select agent to assign</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Case Description</label>
+          <textarea id="caseDescription" class="form-textarea" placeholder="Enter detailed case description..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="createCase()">Create Case</button>
+        <div id="caseMessage"></div>
+      </div>
+
+      <div class="content-card">
+        <h3 style="margin-bottom: 20px;">Active Cases</h3>
+        <div id="casesList"></div>
+      </div>
+    </div>
+
+    <!-- Submit Intel Section -->
+    <div id="submitSection" class="content-section">
+      <div class="content-header">
+        <button class="back-btn" onclick="showDashboard()">← Back</button>
+        <h2>Submit Intelligence Report</h2>
+      </div>
+      
+      <div class="content-card">
+        <div class="form-group">
+          <label class="form-label">Mission Report</label>
+          <textarea id="reportInput" class="form-textarea" placeholder="Enter your detailed mission report here..."></textarea>
+        </div>
+        
+<div class="form-group">
+  <button class="btn-primary" onclick="generateSummary()">Generate Intel Summary</button>
+</div>
+<div id="intelSummary" class="content-card" style="margin-top: 20px;"></div>
+
+<button class="btn-primary" onclick="submitReport()">Submit Report</button>
+        <div id="submitMessage"></div>
+      </div>
+    </div>
+
+    <!-- Mission Log Section -->
+    <div id="reportsSection" class="content-section">
+      <div class="content-header">
+        <button class="back-btn" onclick="showDashboard()">← Back</button>
+        <h2>Mission Log Database</h2>
+      </div>
+      
+      <div class="content-card">
+        <div id="reportsList"></div>
+      </div>
+    </div>
+
+    <!-- User Management Section -->
+    <div id="manageSection" class="content-section">
+      <div class="content-header">
+        <button class="back-btn" onclick="showDashboard()">← Back</button>
+        <h2>Personnel Management</h2>
+      </div>
+      
+      <div class="content-card">
+        <h3 style="margin-bottom: 20px;">Create New Agent</h3>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="newUsername" class="form-input" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="newPassword" class="form-input" placeholder="Enter password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="newRole" class="form-select">
+            <option value="agent">Agent</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="command">Command</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department</label>
+          <select id="newDepartment" class="form-select">
+            <option value="Wildlife Enforcement">Wildlife Enforcement</option>
+            <option value="Marine Patrol">Marine Patrol</option>
+            <option value="Forest Protection">Forest Protection</option>
+            <option value="Environmental Crimes">Environmental Crimes</option>
+            <option value="Special Operations">Special Operations</option>
+            <option value="Operations Command">Operations Command</option>
+            <option value="Intelligence Division">Intelligence Division</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rank</label>
+          <select id="newRank" class="form-select">
+            <option value="Officer">Officer</option>
+            <option value="Senior Officer">Senior Officer</option>
+            <option value="Sergeant">Sergeant</option>
+            <option value="Lieutenant">Lieutenant</option>
+            <option value="Captain">Captain</option>
+            <option value="Director">Director</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Years of Service</label>
+          <input type="number" id="newYears" class="form-input" placeholder="Enter years of service" min="0" max="40">
+        </div>
+        <button class="btn-primary" onclick="createUser()">Create Agent</button>
+        <div id="createUserMessage"></div>
+      </div>
+
+      <div class="content-card">
+        <h3 style="margin-bottom: 20px;">Active Personnel</h3>
+        <div id="agentsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    
+let firebaseReady = false;
+let currentUser = '';
+let users = {};
+let reports = [];
+let cases = [];
+let caseCounter = 1001;
+
+window.onload = function () {
+  firebase.database().ref().once('value').then(snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      users = data.users || {};
+      reports = data.reports || [];
+      cases = data.cases || [];
+      caseCounter = data.caseCounter || 1001;
+    }
+    firebaseReady = true;
+    const btn = document.getElementById('loginBtn');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = 'Enter Secure Network';
+    }
+  });
+};
+
+function saveData() {
+  firebase.database().ref().set({
+    users,
+    reports,
+    cases,
+    caseCounter
+  });
+}
+
+    let users = {
+      'soar': { 
+        password: 'sasrp', 
+        role: 'agent', 
+        badge: 'CIA-2847',
+        department: 'Wildlife Enforcement',
+        yearsOfService: 3,
+        rank: 'Officer'
+      },
+      'fanzo': { 
+        password: 'sasrp', 
+        role: 'command', 
+        badge: 'CIA-1205',
+        department: 'Operations Command',
+        yearsOfService: 8,
+        rank: 'Captain'
+      }
+    };
+    let reports = [];
+    let cases = [];
+    let caseCounter = 1001;
+
+    // Load data from memory (since localStorage isn't available)
+    
+// LOCAL STORAGE: Load from localStorage if exists
+window.onload = function () {
+  const storedUsers = localStorage.getItem('cia_users');
+  const storedReports = localStorage.getItem('cia_reports');
+  const storedCases = localStorage.getItem('cia_cases');
+  const storedCounter = localStorage.getItem('cia_caseCounter');
+
+  if (storedUsers) users = JSON.parse(storedUsers);
+  if (storedReports) reports = JSON.parse(storedReports);
+  if (storedCases) cases = JSON.parse(storedCases);
+  if (storedCounter) caseCounter = parseInt(storedCounter);
+};
+
+function saveData() {
+  localStorage.setItem('cia_users', JSON.stringify(users));
+  localStorage.setItem('cia_reports', JSON.stringify(reports));
+  localStorage.setItem('cia_cases', JSON.stringify(cases));
+  localStorage.setItem('cia_caseCounter', caseCounter.toString());
+}
+
+
+function saveData() {
+      // In a real application, this would save to a backend
+      console.log('Data saved to memory');
+    }
+
+    
+function login() {
+  if (!firebaseReady) {
+    document.getElementById('loginMessage').innerHTML = '<div class="status-warning">Connecting to database... Please wait.</div>';
+    return;
+  }
+
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const message = document.getElementById('loginMessage');
+
+  if (!users[username]) {
+    message.innerHTML = '<div class="status-error">User not found.</div>';
+    return;
+  }
+
+  if (users[username].password === password) {
+    currentUser = username;
+    showDashboard();
+    message.innerHTML = '';
+  } else {
+    message.innerHTML = '<div class="status-error">Incorrect password.</div>';
+  }
+}
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const message = document.getElementById('loginMessage');
+
+      if (users[username] && users[username].password === password) {
+        currentUser = username;
+        showDashboard();
+        message.textContent = '';
+      } else {
+        message.innerHTML = '<div class="status-error">Access Denied. Invalid credentials.</div>';
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      
+      // Hide all sections except nav
+      hideAllSections();
+      document.getElementById('dashboardNav').style.display = 'grid';
+      
+      const role = users[currentUser].role;
+      const userData = users[currentUser];
+      document.getElementById('roleTitle').textContent = `${userData.rank} ${currentUser.toUpperCase()}`;
+      document.getElementById('badgeInfo').textContent = `Badge: ${userData.badge}`;
+      document.getElementById('departmentInfo').textContent = `${userData.department} • ${userData.yearsOfService} years`;
+      document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
+      
+      // Show management card only for command role
+      
+  // Show management card only for supervisor and command roles
+  if (role === 'command' || role === 'supervisor') {
+    document.getElementById('manageCard').style.display = 'block';
+  } else {
+    document.getElementById('manageCard').style.display = 'none';
+  }
+
+    }
+
+    function hideAllSections() {
+      document.getElementById('dashboardNav').style.display = 'none';
+      document.getElementById('casesSection').style.display = 'none';
+      document.getElementById('submitSection').style.display = 'none';
+      document.getElementById('reportsSection').style.display = 'none';
+      document.getElementById('manageSection').style.display = 'none';
+    }
+
+    function showSection(section) {
+      hideAllSections();
+      
+      if (section === 'cases') {
+        document.getElementById('casesSection').style.display = 'block';
+        updateCasesList();
+        updateAssignmentDropdown();
+      } else if (section === 'submit') {
+        document.getElementById('submitSection').style.display = 'block';
+      } else if (section === 'reports') {
+        document.getElementById('reportsSection').style.display = 'block';
+        updateReportsList();
+      } else if (section === 'manage') {
+        document.getElementById('manageSection').style.display = 'block';
+        updateAgentsList();
+      }
+    }
+
+    function submitReport() {
+      const text = document.getElementById('reportInput').value.trim();
+      const message = document.getElementById('submitMessage');
+      
+      if (text) {
+        reports.push({
+          text: text,
+          time: new Date().toLocaleString(),
+          agent: currentUser
+        });
+        document.getElementById('reportInput').value = '';
+        message.innerHTML = '<div class="status-success">Report submitted successfully!</div>';
+        saveData();
+      } else {
+        message.innerHTML = '<div class="status-error">Please enter a report before submitting.</div>';
+      }
+    }
+
+    function updateReportsList() {
+      const list = document.getElementById('reportsList');
+      list.innerHTML = '';
+      
+      if (reports.length === 0) {
+        list.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">No reports submitted yet.</p>';
+        return;
+      }
+      
+      reports.slice().reverse().forEach(report => {
+        const item = document.createElement('div');
+        item.className = 'report-item';
+        item.innerHTML = `
+          <div class="report-time">Submitted by ${report.agent} on ${report.time}</div>
+          <div>${report.text}</div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function createUser() {
+      const newUser = document.getElementById('newUsername').value.trim();
+      const newPass = document.getElementById('newPassword').value.trim();
+      const newRole = document.getElementById('newRole').value;
+      const newDept = document.getElementById('newDepartment').value;
+      const newRank = document.getElementById('newRank').value;
+      const newYears = document.getElementById('newYears').value || 0;
+      const message = document.getElementById('createUserMessage');
+
+      if (newUser && newPass && newRole && newDept && newRank) {
+
+  if (newPass.length < 6) {
+    message.innerHTML = '<div class="status-error">Password must be at least 6 characters.</div>';
+    return;
+  }
+
+        if (!users[newUser]) {
+          // Generate badge number
+          const badgeNum = Math.floor(Math.random() * 9000) + 1000;
+          const badge = `CIA-${badgeNum}`;
+          
+          users[newUser] = { 
+            password: newPass, 
+            role: newRole, 
+            badge: badge,
+            department: newDept,
+            rank: newRank,
+            yearsOfService: parseInt(newYears)
+          };
+          message.innerHTML = `<div class="status-success">Agent '${newUser}' created successfully.<br>Badge Number: ${badge}</div>`;
+          updateAgentsList();
+          saveData();
+          // Clear form
+          document.getElementById('newUsername').value = '';
+          document.getElementById('newPassword').value = '';
+          document.getElementById('newYears').value = '';
+        } else {
+          message.innerHTML = '<div class="status-warning">Agent already exists.</div>';
+        }
+      } else {
+        message.innerHTML = '<div class="status-error">Please fill in all required fields.</div>';
+      }
+    }
+
+    function updateAgentsList() {
+      const list = document.getElementById('agentsList');
+      list.innerHTML = '';
+      
+      for (const [name, data] of Object.entries(users)) {
+        const item = document.createElement('div');
+        item.className = 'agent-card';
+        item.innerHTML = `
+          <div class="agent-info">
+            <div class="agent-name">${data.rank} ${name.toUpperCase()}</div>
+            <div class="agent-details">
+              <span class="badge-number">${data.badge}</span> • ${data.department}<br>
+              Role: ${data.role} • Service: ${data.yearsOfService} years
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="color: #00b894; font-size: 12px; font-weight: 600;">ACTIVE</div>
+            <div style="font-size: 10px; color: rgba(255,255,255,0.4);">Online</div>
+          </div>
+        `;
+        list.appendChild(item);
+      }
+    }
+
+    function generateCaseNumber() {
+      const caseNum = `CIA-OP-${caseCounter}`;
+      document.getElementById('caseNumber').value = caseNum;
+      caseCounter++;
+    }
+
+    function updateAssignmentDropdown() {
+      const dropdown = document.getElementById('assignedAgent');
+      const role = users[currentUser].role;
+      
+      if (role === 'command' || role === 'supervisor') {
+        document.getElementById('assignAgentGroup').style.display = 'block';
+        dropdown.innerHTML = '<option value="">Select agent to assign</option>';
+        
+        for (const [name, data] of Object.entries(users)) {
+          if (data.role === 'agent') {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = `${data.rank} ${name} (${data.badge})`;
+            dropdown.appendChild(option);
+          }
+        }
+      }
+    }
+
+    function createCase() {
+      const caseNumber = document.getElementById('caseNumber').value.trim();
+      const title = document.getElementById('caseTitle').value.trim();
+      const type = document.getElementById('caseType').value;
+      const priority = document.getElementById('casePriority').value;
+      const description = document.getElementById('caseDescription').value.trim();
+      const assignedAgent = document.getElementById('assignedAgent').value;
+      const message = document.getElementById('caseMessage');
+
+      if (caseNumber && title && type && description) {
+        const newCase = {
+          caseNumber: caseNumber,
+          title: title,
+          type: type,
+          priority: priority,
+          description: description,
+          assignedAgent: assignedAgent || 'Unassigned',
+          createdBy: currentUser,
+          createdDate: new Date().toLocaleString(),
+          status: 'Open'
+        };
+        
+        cases.push(newCase);
+        message.innerHTML = '<div class="status-success">Case created successfully!</div>';
+        
+        // Clear form
+        document.getElementById('caseNumber').value = '';
+        document.getElementById('caseTitle').value = '';
+        document.getElementById('caseType').value = '';
+        document.getElementById('caseDescription').value = '';
+        document.getElementById('assignedAgent').value = '';
+        
+        updateCasesList();
+        saveData();
+      } else {
+        message.innerHTML = '<div class="status-error">Please fill in all required fields.</div>';
+      }
+    }
+
+    function updateCasesList() {
+      const list = document.getElementById('casesList');
+      list.innerHTML = '';
+      
+      if (cases.length === 0) {
+        list.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">No active cases.</p>';
+        return;
+      }
+      
+      cases.slice().reverse().forEach(caseItem => {
+        const item = document.createElement('div');
+        item.className = 'case-item';
+        
+        const priorityClass = `priority-${caseItem.priority.toLowerCase()}`;
+        
+        item.innerHTML = `
+          <div class="case-header">
+            <span class="case-number">${caseItem.caseNumber}</span>
+            <span class="priority-badge ${priorityClass}">${caseItem.priority}</span>
+          </div>
+          <div style="margin-bottom: 8px;">
+            <strong>${caseItem.title}</strong>
+            <span style="color: rgba(255,255,255,0.6); margin-left: 12px; font-size: 12px;">${caseItem.type}</span>
+          </div>
+          <div style="color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 8px;">
+            ${caseItem.description}
+          </div>
+          <div class="case-meta">
+            <span>Created: ${caseItem.createdDate}</span>
+            <span>By: ${users[caseItem.createdBy]?.rank} ${caseItem.createdBy}</span>
+            <span>Assigned: ${caseItem.assignedAgent !== 'Unassigned' ? users[caseItem.assignedAgent]?.rank + ' ' + caseItem.assignedAgent : 'Unassigned'}</span>
+            <span>Status: <span style="color: #00b894;">${caseItem.status}</span></span>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function logout() {
+      currentUser = '';
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('loginMessage').innerHTML = '';
+    }
+
+    function togglePassword() {
+      const pwd = document.getElementById('password');
+      pwd.type = pwd.type === 'password' ? 'text' : 'password';
+    }
+
+    // Initialize
+    if (currentUser && users[currentUser]) {
+      showDashboard();
+    }
+  
+// EXTENDED ROLE & MANAGEMENT LOGIC
+
+function updateAgentsList() {
+  const list = document.getElementById('agentsList');
+  list.innerHTML = '';
+  const role = users[currentUser].role;
+
+  for (const [name, data] of Object.entries(users)) {
+    const card = document.createElement('div');
+    card.className = 'agent-card';
+
+    let tools = '';
+    if (role === 'command' || role === 'supervisor') {
+      tools = `
+        <div style="margin-top: 10px;">
+          <button onclick="editAgent('${name}')" class="btn-primary" style="padding: 4px 10px; font-size: 10px;">Edit</button>
+          <button onclick="deleteAgent('${name}')" class="logout-btn" style="padding: 4px 10px; font-size: 10px;">Delete</button>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="agent-info">
+        <div class="agent-name">${data.rank} ${name.toUpperCase()}</div>
+        <div class="agent-details">
+          <span class="badge-number">${data.badge}</span> • ${data.department}<br>
+          Role: ${data.role} • Service: ${data.yearsOfService} years
+        </div>
+        ${tools}
+      </div>
+      <div style="text-align: right;">
+        <div style="color: #00b894; font-size: 12px; font-weight: 600;">ACTIVE</div>
+        <div style="font-size: 10px; color: rgba(255,255,255,0.4);">Online</div>
+      </div>
+    `;
+
+    list.appendChild(card);
+  }
+}
+
+function deleteAgent(name) {
+  if (confirm(`Are you sure you want to delete agent '${name}'?`)) {
+    delete users[name];
+    updateAgentsList();
+    saveData();
+  }
+}
+
+function editAgent(name) {
+  const data = users[name];
+  const newUsername = prompt("Rename agent:", name) || name;
+  const newPassword = prompt("Enter new password:", data.password) || data.password;
+  const newBadge = prompt("Enter new badge number:", data.badge) || data.badge;
+
+  users[newUsername] = {
+    ...data,
+    password: newPassword,
+    badge: newBadge
+  };
+
+  if (newUsername !== name) delete users[name];
+
+  updateAgentsList();
+  saveData();
+}
+
+
+let failedAttempts = 0;
+let lockoutUntil = null;
+
+
+function login() {
+  if (!firebaseReady) {
+    document.getElementById('loginMessage').innerHTML = '<div class="status-warning">Connecting to database... Please wait.</div>';
+    return;
+  }
+
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const message = document.getElementById('loginMessage');
+
+  if (!users[username]) {
+    message.innerHTML = '<div class="status-error">User not found.</div>';
+    return;
+  }
+
+  if (users[username].password === password) {
+    currentUser = username;
+    showDashboard();
+    message.innerHTML = '';
+  } else {
+    message.innerHTML = '<div class="status-error">Incorrect password.</div>';
+  }
+}
+
+  const now = new Date();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const message = document.getElementById('loginMessage');
+
+  if (lockoutUntil && now < lockoutUntil) {
+    message.innerHTML = '<div class="status-error">Login temporarily locked. Try again later.</div>';
+    return;
+  }
+
+  if (users[username] && users[username].password === password) {
+    currentUser = username;
+    failedAttempts = 0;
+    showDashboard();
+    message.textContent = '';
+  } else {
+    failedAttempts++;
+    if (failedAttempts >= 5) {
+      lockoutUntil = new Date(now.getTime() + 10 * 60 * 1000);
+      message.innerHTML = '<div class="status-error">Too many failed attempts. Locked out for 10 minutes.</div>';
+    } else {
+      message.innerHTML = '<div class="status-error">Access Denied. Invalid credentials.</div>';
+    }
+  }
+}
+
+
+let logoutTimer;
+document.onmousemove = resetTimer;
+document.onkeypress = resetTimer;
+
+function resetTimer() {
+  clearTimeout(logoutTimer);
+  if (currentUser) {
+    logoutTimer = setTimeout(() => {
+      alert('Session expired. You have been logged out.');
+      logout();
+    }, 5 * 60 * 1000);
+  }
+}
+
+
+function generateSummary() {
+  const input = document.getElementById('reportInput').value.trim();
+  const output = document.getElementById('intelSummary');
+  if (!input) {
+    output.innerHTML = '<div class="status-warning">Enter a report first to generate summary.</div>';
+    return;
+  }
+  const summary = 'Summary: ' + input.split('.').slice(0, 2).join('.') + '...';
+  output.innerHTML = `<div><strong>AI Summary:</strong><br>${summary}</div>`;
+}
+
+</script>
+</body>
+</html>
